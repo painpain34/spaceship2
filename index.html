@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- 在head中添加 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>黎明前的10秒钟</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="time-board">时间: <span id="time">0</span> 秒</div> <!-- 新增时间框 -->
+        <div id="score-board">分数: <span id="score">0</span></div>
+        <div id="plane"></div>
+        <!-- 将开始按钮移出game-over div -->
+        <div id="start-btn" class="start-button">开始游戏</div>
+        <!-- 在game-container div内添加静音按钮 -->
+        <div id="mute-btn" class="mute-button">🔊</div>
+
+        <!-- 在body底部添加音乐元素 -->
+        <audio id="bgm" loop>
+            <source src="bgm.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+    <!-- 在game-container div内添加排行榜 -->
+    <div id="leaderboard">
+        <h3>排行榜</h3>
+        <ol id="scores-list"></ol>
+    </div>
+    
+    <!-- 修改game-over div -->
+    <div id="game-over" style="display: none;">
+        <p>本局得分: <span id="final-score"></span></p>
+        <div>
+            <label for="player-id">输入ID:</label>
+            <input type="text" id="player-id" maxlength="10">
+        </div>
+        <button id="save-btn">保存分数</button>
+        <button id="restart-btn">重新开始</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

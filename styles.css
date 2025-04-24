@@ -1,0 +1,123 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #000; /* 添加黑色背景 */
+}
+
+#game-container {
+    position: relative;
+    width: 800px;
+    height: 900px;
+    border: 1px solid #000;
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center; /* 背景图片居中 */
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+}
+
+/* 调整游戏容器大小 */
+@media (max-width: 800px) {
+    #game-container {
+        width: 100vw;
+        height: 100vh;
+    }
+}
+
+#plane {
+    position: absolute;
+    width: 50px;
+    height: 70px;
+    background-image: url('plane.png'); /* 飞机图片 */
+    background-size: cover;
+}
+
+.bullet {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #FFFFFF; /* 修改为亮白色 */
+    border-radius: 50%;
+}
+
+#game-over {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+
+
+#time-board {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 18px;
+    z-index: 1;
+}
+
+.start-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 30px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.start-button:hover {
+    background-color: #45a049;
+}
+
+
+#leaderboard {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    width: 300px;
+    max-height: 400px; /* 设置最大高度 */
+    overflow-y: auto; /* 内容过多时显示滚动条 */
+}
+
+#scores-list {
+    padding-left: 20px;
+}
+
+#game-over input {
+    margin: 10px 0;
+    padding: 5px;
+    width: 150px;
+}
+
+.mute-button {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 100;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+}
