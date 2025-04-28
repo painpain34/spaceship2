@@ -57,6 +57,9 @@ function saveScore() {
     
     document.getElementById('save-btn').style.display = 'none';
     document.getElementById('restart-btn').style.display = 'block';
+    
+    document.getElementById('scores-list').style.display = 'none'; // 保存后隐藏排行榜
+    document.getElementById('leaderboard').style.display = 'none'; // 显示分数
 }
 
 // 获取 DOM 元素
@@ -71,7 +74,7 @@ const startBtn = document.getElementById('start-btn');
 
 // 修改init函数
 function init() {
-     // 设置飞机初始位置为屏幕中央
+    // 设置飞机初始位置为屏幕中央
     planeX = gameContainer.offsetWidth / 2 - plane.offsetWidth / 2;
     planeY = gameContainer.offsetHeight / 2 - plane.offsetHeight / 2;
     plane.style.left = planeX + 'px';
@@ -81,18 +84,31 @@ function init() {
     // 添加点击事件
     startBtn.addEventListener('click', function() {
         this.style.display = 'none';
+        document.getElementById('scores-list').style.display = 'none'; // 隐藏排行榜
         startGame();
     });
     // 添加触摸事件
     startBtn.addEventListener('touchstart', function(e) {
         e.preventDefault(); // 防止触摸事件触发其他行为
         this.style.display = 'none';
+        document.getElementById('leaderboard').style.display = 'none'; // 隐藏排行榜
         startGame();
     });
     
     gameOverScreen.style.display = 'none';
-    updateLeaderboard(); // 初始化时显示排行榜
+    document.getElementById('leaderboard').style.display = 'none'; // 初始隐藏整个排行榜区域
     
+    document.getElementById('player-id').addEventListener('focus', function() {
+        document.getElementById('leaderboard').style.display = 'block'; // 显示排行榜
+        document.getElementById('scores-list').style.display = 'block'; // 显示分数
+    });
+    
+    document.getElementById('player-id').addEventListener('blur', function() {
+        if(!this.value) {
+            document.getElementById('leaderboard').style.display = 'none'; // 隐藏排行榜
+            document.getElementById('scores-list').style.display = 'none'; // 隐藏分数
+        }
+    });
     // 添加事件监听
     document.getElementById('save-btn').addEventListener('click', saveScore);
     
