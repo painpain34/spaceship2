@@ -18,6 +18,8 @@ let currentTime = 0; // 新增：记录当前游戏时间
 let isMouseDown = false;
 let targetX = planeX;
 let targetY = planeY;
+let moveLeft = false;
+let moveRight = false;
 const planeSpeed = 5; // 飞机移动速度
 // 在文件顶部变量声明区域添加
 let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
@@ -45,8 +47,44 @@ function init() {
     plane.style.left = planeX + 'px';
     plane.style.top = planeY + 'px';
         // 初始化排行榜显示
-        updateLeaderboard();
-    
+    updateLeaderboard();
+//左右按钮功能
+
+const controlsDiv = document.createElement('div');
+controlsDiv.id = 'controls';
+controlsDiv.style.display = 'none'; // 初始隐藏
+
+// 创建左右按钮
+const leftBtn = document.createElement('button');
+leftBtn.textContent = '左';
+
+const rightBtn = document.createElement('button');
+rightBtn.textContent = '右';
+
+leftBtn.addEventListener('mousedown', () => { moveLeft = true; });
+leftBtn.addEventListener('mouseup', () => { moveLeft = false; });
+leftBtn.addEventListener('mouseleave', () => { moveLeft = false; });
+leftBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    moveLeft = true;
+});
+leftBtn.addEventListener('touchend', () => { moveLeft = false; });
+
+rightBtn.addEventListener('mousedown', () => { moveRight = true; });
+rightBtn.addEventListener('mouseup', () => { moveRight = false; });
+rightBtn.addEventListener('mouseleave', () => { moveRight = false; });
+rightBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    moveRight = true;
+});
+rightBtn.addEventListener('touchend', () => { moveRight = false; });
+
+controlsDiv.appendChild(leftBtn);
+controlsDiv.appendChild(rightBtn);
+gameContainer.appendChild(controlsDiv);
+
+
+
     startBtn.style.display = 'block';
     // 添加点击事件
     startBtn.addEventListener('click', function() {
@@ -133,7 +171,8 @@ function startGame() {
     // 重置按钮状态
     document.getElementById('save-btn').style.display = 'block';
     document.getElementById('restart-btn').style.display = 'none';
-    
+    document.getElementById('controls').style.display = 'flex'; // 显示控制按钮
+
     // 重置飞机位置
     planeX = 190;
     planeY = 420;
@@ -188,8 +227,7 @@ function updateTargetPosition(touch) {
 
 // 修改movePlane函数中的触摸控制部分
 function movePlane() {
-    let dx = 0;
-    let dy = 0;
+
     
     // 触摸/鼠标控制逻辑
     if(isMouseDown) {
@@ -218,8 +256,14 @@ function movePlane() {
     
 
 
-    planeX += dx;
-    planeY += dy;
+
+     // 按钮控制逻辑
+     if(moveLeft) {
+        planeX -= planeSpeed;
+    }
+    if(moveRight) {
+        planeX += planeSpeed;
+    }
 
     // 边界检测
     planeX = Math.max(0, Math.min(planeX, gameContainer.offsetWidth - plane.offsetWidth));

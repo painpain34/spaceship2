@@ -19,7 +19,29 @@ body {
     -webkit-tap-highlight-color: transparent;
     touch-action: none;
 }
+/* 添加在文件末尾 */
+#controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: none; /* 初始隐藏 */
+    justify-content: center;
+    gap: 20px;
+}
 
+#controls button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#controls button:active {
+    background-color: #3e8e41;
+}
 /* 调整游戏容器大小 */
 @media (max-width: 800px) {
     #game-container {
