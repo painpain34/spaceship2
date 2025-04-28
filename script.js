@@ -25,6 +25,56 @@ const bgm = document.getElementById('bgm');
 const muteBtn = document.getElementById('mute-btn');
 let isMuted = false;
 
+
+
+// 获取 DOM 元素
+const gameContainer = document.getElementById('game-container');
+const plane = document.getElementById('plane');
+const scoreBoard = document.getElementById('score');
+const gameOverScreen = document.getElementById('game-over');
+const finalScore = document.getElementById('final-score');
+const restartBtn = document.getElementById('restart-btn');
+const timeElement = document.getElementById('time'); // 新增：获取时间元素
+const startBtn = document.getElementById('start-btn');
+
+// 修改init函数
+function init() {
+    // 设置飞机初始位置为屏幕中央
+    planeX = 190;
+    planeY = 420;
+    plane.style.left = planeX + 'px';
+    plane.style.top = planeY + 'px';
+        // 初始化排行榜显示
+        updateLeaderboard();
+    
+    startBtn.style.display = 'block';
+    // 添加点击事件
+    startBtn.addEventListener('click', function() {
+        this.style.display = 'none';
+        document.getElementById('scores-list').style.display = 'none'; // 隐藏排行榜
+        document.getElementById('leaderboard').style.display = 'none';
+        startGame();
+    });
+    // 添加触摸事件
+    startBtn.addEventListener('touchstart', function(e) {
+        e.preventDefault(); // 防止触摸事件触发其他行为
+        this.style.display = 'none';
+        document.getElementById('leaderboard').style.display = 'none'; // 隐藏排行榜
+        document.getElementById('scores-list').style.display = 'none'; 
+        startGame();
+    });
+    
+    gameOverScreen.style.display = 'none';
+    
+    
+    
+    // 添加事件监听
+    document.getElementById('save-btn').addEventListener('click', saveScore);
+    
+    // 添加静音按钮事件
+    muteBtn.addEventListener('click', toggleMute);
+}
+
 // 新增全局函数：更新排行榜显示
 function updateLeaderboard() {
     const scoresList = document.getElementById('scores-list');
@@ -57,63 +107,9 @@ function saveScore() {
     
     document.getElementById('save-btn').style.display = 'none';
     document.getElementById('restart-btn').style.display = 'block';
-    
-    document.getElementById('scores-list').style.display = 'none'; // 保存后隐藏排行榜
-    document.getElementById('leaderboard').style.display = 'none'; // 显示分数
-}
 
-// 获取 DOM 元素
-const gameContainer = document.getElementById('game-container');
-const plane = document.getElementById('plane');
-const scoreBoard = document.getElementById('score');
-const gameOverScreen = document.getElementById('game-over');
-const finalScore = document.getElementById('final-score');
-const restartBtn = document.getElementById('restart-btn');
-const timeElement = document.getElementById('time'); // 新增：获取时间元素
-const startBtn = document.getElementById('start-btn');
 
-// 修改init函数
-function init() {
-    // 设置飞机初始位置为屏幕中央
-    planeX = 190;
-    planeY = 420;
-    plane.style.left = planeX + 'px';
-    plane.style.top = planeY + 'px';
     
-    startBtn.style.display = 'block';
-    // 添加点击事件
-    startBtn.addEventListener('click', function() {
-        this.style.display = 'none';
-        document.getElementById('scores-list').style.display = 'none'; // 隐藏排行榜
-        startGame();
-    });
-    // 添加触摸事件
-    startBtn.addEventListener('touchstart', function(e) {
-        e.preventDefault(); // 防止触摸事件触发其他行为
-        this.style.display = 'none';
-        document.getElementById('leaderboard').style.display = 'none'; // 隐藏排行榜
-        startGame();
-    });
-    
-    gameOverScreen.style.display = 'none';
-    document.getElementById('leaderboard').style.display = 'none'; // 初始隐藏整个排行榜区域
-    
-    document.getElementById('player-id').addEventListener('focus', function() {
-        document.getElementById('leaderboard').style.display = 'block'; // 显示排行榜
-        document.getElementById('scores-list').style.display = 'block'; // 显示分数
-    });
-    
-    document.getElementById('player-id').addEventListener('blur', function() {
-        if(!this.value) {
-            document.getElementById('leaderboard').style.display = 'none'; // 隐藏排行榜
-            document.getElementById('scores-list').style.display = 'none'; // 隐藏分数
-        }
-    });
-    // 添加事件监听
-    document.getElementById('save-btn').addEventListener('click', saveScore);
-    
-    // 添加静音按钮事件
-    muteBtn.addEventListener('click', toggleMute);
 }
 
 // 修改startGame函数
@@ -131,7 +127,8 @@ function startGame() {
     timeElement.textContent = '0';
     scoreBoard.textContent = '0';
     gameOverScreen.style.display = 'none';
-    
+    document.getElementById('leaderboard').style.display = 'none'; // 隐藏排行榜
+    document.getElementById('scores-list').style.display = 'none'; // 隐藏分数
     
     // 重置按钮状态
     document.getElementById('save-btn').style.display = 'block';
@@ -220,43 +217,6 @@ function movePlane() {
     }
     
 
-
-    // 检查相反方向键
-    const hasOppositeKeys = 
-        (keys['ArrowUp'] && keys['ArrowDown']) ||
-        (keys['ArrowLeft'] && keys['ArrowRight']);
-    
-    // 检查按键数量
-    const pressedKeys = Object.values(keys).filter(v => v).length;
-    const tooManyKeys = pressedKeys >= 3;
-
-    // 如果有相反方向键或按太多键，则不动
-    if (hasOppositeKeys || tooManyKeys) {
-        return;
-    }
-
-    // 原有移动逻辑保持不变
-    if (keys['ArrowUp'] && keys['ArrowLeft']) {
-        dx = -3;
-        dy = -3;
-    } else if (keys['ArrowUp'] && keys['ArrowRight']) {
-        dx = 3;
-        dy = -3;
-    } else if (keys['ArrowDown'] && keys['ArrowLeft']) {
-        dx = -3;
-        dy = 3;
-    } else if (keys['ArrowDown'] && keys['ArrowRight']) {
-        dx = 3;
-        dy = 3;
-    } else if (keys['ArrowUp']) {
-        dy = -3;
-    } else if (keys['ArrowDown']) {
-        dy = 3;
-    } else if (keys['ArrowLeft']) {
-        dx = -3;
-    } else if (keys['ArrowRight']) {
-        dx = 3;
-    }
 
     planeX += dx;
     planeY += dy;
@@ -395,7 +355,8 @@ function gameOver() {
         gameContainer.removeChild(bullets[i].element);
         bullets.splice(i, 1);
     }
-    
+    document.getElementById('scores-list').style.display = 'block'; 
+    document.getElementById('leaderboard').style.display = 'block'; // 显示排行榜
     // 清除按键信息
     keys = {};
     
