@@ -71,14 +71,21 @@ const startBtn = document.getElementById('start-btn');
 
 // 修改init函数
 function init() {
-    // 设置飞机初始位置为屏幕中央
+     // 设置飞机初始位置为屏幕中央
     planeX = gameContainer.offsetWidth / 2 - plane.offsetWidth / 2;
     planeY = gameContainer.offsetHeight / 2 - plane.offsetHeight / 2;
     plane.style.left = planeX + 'px';
     plane.style.top = planeY + 'px';
     
     startBtn.style.display = 'block';
+    // 添加点击事件
     startBtn.addEventListener('click', function() {
+        this.style.display = 'none';
+        startGame();
+    });
+    // 添加触摸事件
+    startBtn.addEventListener('touchstart', function(e) {
+        e.preventDefault(); // 防止触摸事件触发其他行为
         this.style.display = 'none';
         startGame();
     });
