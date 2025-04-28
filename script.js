@@ -4,8 +4,8 @@ planeImage.src = 'plane.png';
 
 // 游戏参数
 let score = 0;
-let planeX = 375;
-let planeY = 275;
+let planeX = 150;
+let planeY = 450;
 let lastBulletTime = 0;  // 记录上次生成子弹的时间
 let bullets = [];
 let bulletSpeed = 2;
@@ -75,8 +75,8 @@ const startBtn = document.getElementById('start-btn');
 // 修改init函数
 function init() {
     // 设置飞机初始位置为屏幕中央
-    planeX = gameContainer.offsetWidth / 2 - plane.offsetWidth / 2;
-    planeY = gameContainer.offsetHeight / 2 - plane.offsetHeight / 2;
+    planeX = 190;
+    planeY = 420;
     plane.style.left = planeX + 'px';
     plane.style.top = planeY + 'px';
     
@@ -138,8 +138,8 @@ function startGame() {
     document.getElementById('restart-btn').style.display = 'none';
     
     // 重置飞机位置
-    planeX = gameContainer.offsetWidth / 2 - plane.offsetWidth / 2;
-    planeY = gameContainer.offsetHeight / 2 - plane.offsetHeight / 2;
+    planeX = 190;
+    planeY = 420;
     plane.style.left = planeX + 'px';
     plane.style.top = planeY + 'px';
     
@@ -181,25 +181,38 @@ function updateGame() {
 
 
 // 移动飞机
-// 修改movePlane函数
+// 修改触摸事件处理函数
+function updateTargetPosition(touch) {
+    const rect = gameContainer.getBoundingClientRect();
+    targetX = touch.clientX - rect.left;
+    targetY = touch.clientY - rect.top;
+    isMouseDown = true;  // 确保触摸时设置isMouseDown为true
+}
+
+// 修改movePlane函数中的触摸控制部分
 function movePlane() {
     let dx = 0;
     let dy = 0;
-    // 鼠标控制逻辑
-       if(isMouseDown) {
+    
+    // 触摸/鼠标控制逻辑
+    if(isMouseDown) {
+        // 计算飞机中心点
+        const planeCenterX = planeX + plane.offsetWidth / 2;
+        const planeCenterY = planeY + plane.offsetHeight / 2;
+        
         // 计算方向向量
-        const dx = targetX - (planeX + 25); // 25是飞机宽度的一半
-        const dy = targetY - (planeY + 35); // 35是飞机高度的一半
-        const distance = Math.sqrt(dx*dx + dy*dy);
+        const dirX = targetX - planeCenterX;
+        const dirY = targetY - planeCenterY;
+        const distance = Math.sqrt(dirX*dirX + dirY*dirY);
         
         // 如果距离足够近则直接到达目标点
         if(distance < planeSpeed) {
-            planeX = targetX - 25;
-            planeY = targetY - 35;
+            planeX = targetX - plane.offsetWidth / 2;
+            planeY = targetY - plane.offsetHeight / 2;
         } else {
             // 标准化方向向量并乘以速度
-            const vx = (dx/distance) * planeSpeed;
-            const vy = (dy/distance) * planeSpeed;
+            const vx = (dirX/distance) * planeSpeed;
+            const vy = (dirY/distance) * planeSpeed;
             
             planeX += vx;
             planeY += vy;
@@ -397,56 +410,7 @@ function gameOver() {
     document.getElementById('restart-btn').style.display = 'none';
 }
 
-// 开始游戏
-function startGame() {
-    score = 0;
-    bullets = [];
-    bulletSpeed = 2;
-    bulletFrequency = 1;
-    
-    // 重置飞机位置
-    planeX = 375;
-    planeY = 275;
-    plane.style.left = planeX + 'px';
-    plane.style.top = planeY + 'px';
-    
-    gameOverScreen.style.display = 'none';
-    startTime = Date.now();
-    gameInterval = setInterval(updateGame, 16);
-    
-    // 清除旧的子弹生成器
-    if (bulletInterval) {
-        clearInterval(bulletInterval);
-    }
-    bulletInterval = setInterval(createBullet, 1000 / bulletFrequency);
-    
-    // 开始播放背景音乐
-    bgm.volume = 0.7;
-    bgm.play()
-        .then(() => {
-            console.log('音乐开始播放');
-            console.log('音乐状态:', {
-                paused: bgm.paused,
-                muted: bgm.muted,
-                volume: bgm.volume,
-                readyState: bgm.readyState
-            });
-        })
-        .catch(error => {
-            console.error('音乐播放失败:', error);
-        });
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-    let touchId = null;
-    }
-gameContainer.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    if(touchId === null) {
-        touchId = e.changedTouches[0].identifier;
-        isMouseDown = true;
-        updateTargetPosition(e.changedTouches[0]);
-    }
-});
+
 
 gameContainer.addEventListener('touchmove', (e) => {
     e.preventDefault();

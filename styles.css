@@ -9,7 +9,7 @@ body {
 
 #game-container {
     position: relative;
-    width: 800px;
+    width: 400px;
     height: 900px;
     border: 1px solid #000;
     background-image: url('background.jpg');
