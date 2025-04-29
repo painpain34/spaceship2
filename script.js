@@ -468,3 +468,28 @@ function toggleMute() {
     console.log(`音乐已${isMuted ? '静音' : '恢复'}, 当前音量: ${bgm.volume}`);
 }
 
+
+// 添加触摸事件监听
+gameContainer.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    isMouseDown = true;
+    const touch = e.touches[0];
+    const rect = gameContainer.getBoundingClientRect();
+    targetX = touch.clientX - rect.left;
+    targetY = touch.clientY - rect.top;
+});
+
+gameContainer.addEventListener('touchmove', (e) => {
+    if(isMouseDown) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = gameContainer.getBoundingClientRect();
+        targetX = touch.clientX - rect.left;
+        targetY = touch.clientY - rect.top;
+    }
+});
+
+gameContainer.addEventListener('touchend', () => {
+    isMouseDown = false;
+});
+
