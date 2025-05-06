@@ -4,8 +4,8 @@ planeImage.src = 'plane.png';
 
 // 游戏参数
 let score = 0;
-let planeX = 150;
-let planeY = 450;
+let planeX = 450;
+let planeY = 500;
 let lastBulletTime = 0;  // 记录上次生成子弹的时间
 let bullets = [];
 let bulletSpeed = 2;
@@ -20,6 +20,7 @@ let targetX = planeX;
 let targetY = planeY;
 let moveLeft = false;
 let moveRight = false;
+let touchId = null;
 const planeSpeed = 5; // 飞机移动速度
 // 在文件顶部变量声明区域添加
 let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
@@ -42,46 +43,13 @@ const startBtn = document.getElementById('start-btn');
 // 修改init函数
 function init() {
     // 设置飞机初始位置为屏幕中央
-    planeX = 190;
-    planeY = 420;
+    planeX = 450;
+    planeY = 450;
     plane.style.left = planeX + 'px';
     plane.style.top = planeY + 'px';
         // 初始化排行榜显示
     updateLeaderboard();
-//左右按钮功能
 
-const controlsDiv = document.createElement('div');
-controlsDiv.id = 'controls';
-controlsDiv.style.display = 'none'; // 初始隐藏
-
-// 创建左右按钮
-const leftBtn = document.createElement('button');
-leftBtn.textContent = '左';
-
-const rightBtn = document.createElement('button');
-rightBtn.textContent = '右';
-
-leftBtn.addEventListener('mousedown', () => { moveLeft = true; });
-leftBtn.addEventListener('mouseup', () => { moveLeft = false; });
-leftBtn.addEventListener('mouseleave', () => { moveLeft = false; });
-leftBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    moveLeft = true;
-});
-leftBtn.addEventListener('touchend', () => { moveLeft = false; });
-
-rightBtn.addEventListener('mousedown', () => { moveRight = true; });
-rightBtn.addEventListener('mouseup', () => { moveRight = false; });
-rightBtn.addEventListener('mouseleave', () => { moveRight = false; });
-rightBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    moveRight = true;
-});
-rightBtn.addEventListener('touchend', () => { moveRight = false; });
-
-controlsDiv.appendChild(leftBtn);
-controlsDiv.appendChild(rightBtn);
-gameContainer.appendChild(controlsDiv);
 
 
 
@@ -120,7 +88,7 @@ function updateLeaderboard() {
     
     leaderboard.forEach((entry, index) => {
         const li = document.createElement('li');
-        li.innerHTML = `${index + 1}. ${entry.id} - ${entry.score} (${entry.date})`;
+        li.innerHTML = ` ${entry.id} - ${entry.score} (${entry.date})`;
         scoresList.appendChild(li);
     });
 }
@@ -171,11 +139,10 @@ function startGame() {
     // 重置按钮状态
     document.getElementById('save-btn').style.display = 'block';
     document.getElementById('restart-btn').style.display = 'none';
-    document.getElementById('controls').style.display = 'flex'; // 显示控制按钮
 
     // 重置飞机位置
-    planeX = 190;
-    planeY = 420;
+    planeX = (gameContainer.clientWidth - plane.offsetWidth) / 2;
+    planeY = (gameContainer.clientHeight - plane.offsetHeight) / 2;
     plane.style.left = planeX + 'px';
     plane.style.top = planeY + 'px';
     
@@ -187,11 +154,13 @@ function startGame() {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 }
-// 修改updateGame函数
+// 修改updateGame函数中的时间显示部分
 function updateGame() {
-    currentTime = Math.floor((Date.now() - startTime) / 1000);
-    timeElement.textContent = currentTime;
-    score = currentTime * currentTime + currentTime;
+    currentTime = Date.now() - startTime; // 获取毫秒数
+    timeElement.textContent = currentTime; // 直接显示毫秒
+    
+    // 计算分数（保持原有逻辑）
+    score = Math.floor(currentTime/100) * Math.floor(currentTime/100) + Math.floor(currentTime/100);
     scoreBoard.textContent = score;
 
     // 移动飞机
@@ -204,8 +173,8 @@ function updateGame() {
     checkCollision();
 
     // 增加子弹速度和频率
-    bulletSpeed = 2 + currentTime * 0.05;
-    bulletFrequency = 1 + currentTime * 0.3;
+    bulletSpeed = 2 + currentTime * 0.00005;
+    bulletFrequency = 1 + currentTime * 0.0003;
 
     // 基于时间的子弹生成逻辑
     const now = Date.now();
@@ -214,7 +183,34 @@ function updateGame() {
         lastBulletTime = now;
     }
 }
+// 重写触摸事件监听
+gameContainer.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    touchId = touch.identifier; // 记录当前触摸点ID
+    updateTargetPosition(touch);
+});
 
+gameContainer.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    for(let i = 0; i < e.changedTouches.length; i++) {
+        if(e.changedTouches[i].identifier === touchId) {
+            updateTargetPosition(e.changedTouches[i]);
+            break;
+        }
+    }
+});
+
+gameContainer.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    for(let i = 0; i < e.changedTouches.length; i++) {
+        if(e.changedTouches[i].identifier === touchId) {
+            isMouseDown = false;
+            touchId = null;
+            break;
+        }
+    }
+});
 
 // 移动飞机
 // 修改触摸事件处理函数
@@ -227,30 +223,50 @@ function updateTargetPosition(touch) {
 
 // 修改movePlane函数中的触摸控制部分
 function movePlane() {
-
+// 键盘控制逻辑
+    const pressedKeys = Object.values(keys).filter(v => v).length;
+    if (pressedKeys <= 2) {
+        if (keys['ArrowLeft'] && keys['ArrowUp']) {
+            // 左上45度移动
+            planeX -= planeSpeed * 0.707; // cos(45°)
+            planeY -= planeSpeed * 0.707; // sin(45°)
+        } else if (keys['ArrowLeft'] && keys['ArrowDown']) {
+            // 左下45度移动
+            planeX -= planeSpeed * 0.707;
+            planeY += planeSpeed * 0.707;
+        } else if (keys['ArrowRight'] && keys['ArrowUp']) {
+            // 右上45度移动
+            planeX += planeSpeed * 0.707;
+            planeY -= planeSpeed * 0.707;
+        } else if (keys['ArrowRight'] && keys['ArrowDown']) {
+            // 右下45度移动
+            planeX += planeSpeed * 0.707;
+            planeY += planeSpeed * 0.707;
+        } else if (keys['ArrowLeft']) {
+            planeX -= planeSpeed;
+        } else if (keys['ArrowRight']) {
+            planeX += planeSpeed;
+        } else if (keys['ArrowUp']) {
+            planeY -= planeSpeed;
+        } else if (keys['ArrowDown']) {
+            planeY += planeSpeed;
+        }
+    }
     
     // 触摸/鼠标控制逻辑
     if(isMouseDown) {
-        // 计算飞机中心点
-        const planeCenterX = planeX + plane.offsetWidth / 2;
-        const planeCenterY = planeY + plane.offsetHeight / 2;
+        // 计算移动方向向量
+        const dx = targetX - (planeX + plane.offsetWidth/2);
+        const dy = targetY - (planeY + plane.offsetHeight/2);
+        const distance = Math.sqrt(dx*dx + dy*dy);
         
-        // 计算方向向量
-        const dirX = targetX - planeCenterX;
-        const dirY = targetY - planeCenterY;
-        const distance = Math.sqrt(dirX*dirX + dirY*dirY);
+        // 动态调整移动速度 - 距离越远移动越快
+        const speedFactor = Math.min(1, distance / 100); 
+        const effectiveSpeed = planeSpeed * (0.5 + speedFactor * 0.5);
         
-        // 如果距离足够近则直接到达目标点
-        if(distance < planeSpeed) {
-            planeX = targetX - plane.offsetWidth / 2;
-            planeY = targetY - plane.offsetHeight / 2;
-        } else {
-            // 标准化方向向量并乘以速度
-            const vx = (dirX/distance) * planeSpeed;
-            const vy = (dirY/distance) * planeSpeed;
-            
-            planeX += vx;
-            planeY += vy;
+        if(distance > 5) { // 增加移动阈值减少抖动
+            planeX += (dx / distance) * effectiveSpeed;
+            planeY += (dy / distance) * effectiveSpeed;
         }
     }
     
@@ -416,40 +432,34 @@ function gameOver() {
 }
 
 
-
-gameContainer.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    for(let i = 0; i < e.changedTouches.length; i++) {
-        if(e.changedTouches[i].identifier === touchId) {
-            updateTargetPosition(e.changedTouches[i]);
-            break;
-        }
-    }
-});
-
-gameContainer.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    for(let i = 0; i < e.changedTouches.length; i++) {
-        if(e.changedTouches[i].identifier === touchId) {
-            isMouseDown = false;
-            touchId = null;
-            break;
-        }
-    }
-});
-
-function updateTargetPosition(touch) {
-    const rect = gameContainer.getBoundingClientRect();
-    targetX = touch.clientX - rect.left;
-    targetY = touch.clientY - rect.top;
-}
-
 // 处理按键按下事件
+// 修改handleKeyDown函数
 function handleKeyDown(event) {
     keys[event.code] = true;
+    
+    // 检查按键数量
+    const pressedKeys = Object.values(keys).filter(v => v).length;
+    if (pressedKeys >= 3) {
+        // 按住3个或更多键时停止移动
+        moveLeft = false;
+        moveRight = false;
+        return;
+    }
+    
+    // 检查相反方向键
+    const hasOppositeKeys = 
+        (keys['ArrowLeft'] && keys['ArrowRight']) ||
+        (keys['ArrowUp'] && keys['ArrowDown']);
+    
+    if (hasOppositeKeys) {
+        // 同时按住左右或上下时停止移动
+        moveLeft = false;
+        moveRight = false;
+        return;
+    }
 }
 
-// 处理按键释放事件
+// 修改handleKeyUp函数
 function handleKeyUp(event) {
     keys[event.code] = false;
 }
@@ -469,27 +479,4 @@ function toggleMute() {
 }
 
 
-// 添加触摸事件监听
-gameContainer.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    isMouseDown = true;
-    const touch = e.touches[0];
-    const rect = gameContainer.getBoundingClientRect();
-    targetX = touch.clientX - rect.left;
-    targetY = touch.clientY - rect.top;
-});
-
-gameContainer.addEventListener('touchmove', (e) => {
-    if(isMouseDown) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const rect = gameContainer.getBoundingClientRect();
-        targetX = touch.clientX - rect.left;
-        targetY = touch.clientY - rect.top;
-    }
-});
-
-gameContainer.addEventListener('touchend', () => {
-    isMouseDown = false;
-});
 
